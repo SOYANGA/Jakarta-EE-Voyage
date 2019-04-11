@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--此处配置类 创建对象的描述信息 有参构造 对象被动创建-->
+    <bean id="circular" class="com.github.soyanga.common.impl.Circular">
+        <constructor-arg name="radius" value="10"/>
+    </bean>
+
+    <bean id="rectangle" class="com.github.soyanga.common.impl.Rectangle">
+        <constructor-arg name="width" value="10"/>
+        <constructor-arg name="height" value="20"/>
+    </bean>
+
+    <bean id="triangle" class="com.github.soyanga.common.impl.Triangle">
+        <constructor-arg name="a" value="10"/>
+        <constructor-arg name="b" value="24"/>
+        <constructor-arg name="c" value="30"/>
+    </bean>
+
+    <!--类装配属性 外键  依赖装配-->
+    <bean id="xmlShapeCompute" class="com.github.soyanga.xml.XmlShapeCompute">
+        <property name="circular" ref="circular"/>
+        <property name="rectangle" ref="rectangle"/>
+        <property name="triangle" ref="triangle"/>
+    </bean>
+
+</beans>
