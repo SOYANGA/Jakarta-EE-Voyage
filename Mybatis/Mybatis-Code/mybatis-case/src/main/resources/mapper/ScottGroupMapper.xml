@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.soyanga.mybatis.mapper.ScottGroupMapper">
+    <!--开启缓存-->
+    <!--<cache/>-->
+    <resultMap id="ScottGroup" type="ScottGroup">
+        <id property="deptno" column="deptno" jdbcType="INTEGER"/>
+        <result property="dname" column="dname" jdbcType="VARCHAR"/>
+        <result property="loc" column="loc" jdbcType="VARCHAR"/>
+        <!--<select deptno="selectScottGroup" resultMap="scottGroup">-->
+        <!--select deptno,dname,loc from scott-->
+        <!--where deptno = #{deptno}-->
+        <!--</select>-->
+    </resultMap>
+    <!--SQL片段-->
+    <sql id="basic_column">
+        id,dname,loc
+    </sql>
+
+    <!--插入信息-->
+    <insert id="insertScottGroup" useGeneratedKeys="true" keyProperty="deptno" keyColumn="deptno"
+            parameterType="ScottGroup">
+        insert into dept (deptno,loc,dname)
+                values (#{deptno},#{loc},#{dname})
+    </insert>
+
+    <!--修改更新信息-->
+    <!--<update id="updateScottInfo">-->
+
+    <!--</update>-->
+
+    <!--<delete id="deleteScottInfoById">-->
+    <!--delete from dept-->
+    <!--where  id = #{id}-->
+    <!--</delete>-->
+
+    <!--查询信息-->
+    <select id="query" resultMap="ScottGroup">
+        select
+        <include refid="basic_column"/>
+        from dept;
+    </select>
+
+</mapper>
+
+        <!--&lt;!&ndash;<properties resource="config/database.properties">&ndash;&gt;-->
+        <!--&lt;!&ndash;<property name="username" value="root"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;</properties>&ndash;&gt;-->
+        <!--&lt;!&ndash;mybatis的配置的属性信息&ndash;&gt;-->
+        <!--<properties resource="config/database.properties">-->
+        <!--&lt;!&ndash;属性解析启动默认值&ndash;&gt;-->
+        <!--<property name="org.apache.ibatis.parsing.PropertyParser.enable-default-value" value="true"/>-->
+        <!--</properties>-->
+
+        <!--&lt;!&ndash;mybatis配置，主要影响mybatis的运行行为  日志框架&ndash;&gt;-->
+        <!--<settings>-->
+        <!--<setting name="logImpl" value="SLF4j"/>-->
+        <!--</settings>-->
+
+        <!--&lt;!&ndash;配置类的别名&ndash;&gt;-->
+        <!--<typeAliases>-->
+        <!--<typeAlias alias="ScottGroup" type="com.soyanga.mybatis.entity.ScottGroup"/>-->
+        <!--<typeAlias alias="ScottEmp" type="com.soyanga.mybatis.entity.ScottEmp"/>-->
+        <!--<typeAlias alias="ScottShare" type="com.soyanga.mybatis.entity.ScottShare"/>-->
+        <!--&lt;!&ndash;指定一个包名，别名默认为类名的全小写&ndash;&gt;-->
+        <!--&lt;!&ndash;<package name="com.soyanga.mybatis.entity"/>&ndash;&gt;-->
+        <!--</typeAliases>-->
+
+        <!--&lt;!&ndash;类型处理器&ndash;&gt;-->
+        <!--<typeHandlers>-->
+        <!--<typeHandler handler="com.soyanga.mybatis.plugin.MyStringTypeHandler"-->
+        <!--jdbcType="VARCHAR" javaType="string"/>-->
+        <!--&lt;!&ndash;多个类型处理器的加载&ndash;&gt;-->
+        <!--<package name="com.soyanga.mybatis.plugin"/>-->
+        <!--</typeHandlers>-->
+
+        <!--&lt;!&ndash;对象工厂-对象的构建&ndash;&gt;-->
+        <!--<objectFactory type="org.apache.ibatis.reflection.factory.DefaultObjectFactory">-->
+        <!--&lt;!&ndash;name属性名 value属性个数&ndash;&gt;-->
+        <!--<property name="abc" value="1"/>-->
+        <!--<property name="def" value="2"/>-->
+        <!--</objectFactory>-->
+
+        <!--<environments default="dev">-->
+        <!--<environment id="dev">-->
+        <!--<transactionManager type="JDBC">-->
+        <!--</transactionManager>-->
+        <!--<dataSource type="POOLED">-->
+        <!--<property name="driver" value="${driver:com.mysql.jdbc.Driver}"/>-->
+        <!--<property name="url" value="jdbc:mysql://localhost:3306/scott"/>-->
+        <!--<property name="username" value="${username:root}"/>-->
+        <!--<property name="password" value="${password:123456789}"/>-->
+        <!--</dataSource>-->
+        <!--</environment>-->
+
+        <!--<environment id="prod">-->
+        <!--<transactionManager type="JDBC">-->
+        <!--</transactionManager>-->
+        <!--<dataSource type="POOLED">-->
+        <!--<property name="driver" value="${driver:com.mysql.jdbc.Driver}"/>-->
+        <!--<property name="url" value="jdbc:mysql://localhost:3306/scott"/>-->
+        <!--<property name="username" value="${username:root}"/>-->
+        <!--<property name="password" value="${password:123456789}"/>-->
+        <!--</dataSource>-->
+        <!--</environment>-->
+        <!--</environments>-->
+
+        <!--<mappers>-->
+        <!--<mapper resource="mapper/ScottGroupMapper.xml"/>-->
+        <!--</mappers>-->

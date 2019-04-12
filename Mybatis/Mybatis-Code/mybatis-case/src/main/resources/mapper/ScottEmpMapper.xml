@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.soyanga.mybatis.mapper.ScottEmpMapper">
+
+    <!--开启缓存  config文件中默认开启二级缓存开关-->
+    <!--<cache />-->
+
+    <!--自定义二级缓存MyCache-->
+    <!--<cache type="com.soyanga.mybatis.plugin.MyCache">-->
+    <!--&lt;!&ndash;给MyCache中的属性使用XML进行配置 最大回收策略中的最大阈值为1000个对象&ndash;&gt;-->
+    <!--<property name="maxSize" value="1000"/>-->
+    <!--</cache>-->
+
+    <!--第三方框架Ehcache配置二级缓存-->
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache">
+        <!--缓存空闲时间-->
+        <property name="timeToIdleSeconds" value="3600"/><!--hour-->
+        <!--缓存存活时间-->
+        <property name="timeToLiveSeconds" value="3600"/><!--hour-->
+        <!--在堆上可放多少东西-->
+        <property name="maxEntriesLocalHeap" value="1000"/>
+        <!--在磁盘上可以放多少东西-->
+        <property name="maxEntriesLocalDisk" value="10000000"/>
+        <!--内存存储的替换策略-->
+        <property name="memoryStoreEvictionPolicy" value="LRU"/>
+    </cache>
+
+    <resultMap id="scottEmpMap" type="com.soyanga.mybatis.entity.ScottEmp">
+        <id property="deptno" column="deptno" jdbcType="INTEGER"/>
+        <result property="common" column="comm" jdbcType="DECIMAL"/>
+        <result property="deptno" column="deptno" jdbcType="INTEGER"/>
+        <result property="ename" column="ename" jdbcType="VARCHAR"/>
+        <result property="hiredate" column="hiredate" jdbcType="TIMESTAMP"/>
+        <result property="job" column="job" jdbcType="VARCHAR"/>
+        <result property="mgr" column="mgr" jdbcType="INTEGER"/>
+        <result property="sal" column="sal" jdbcType="DECIMAL"/>
+    </resultMap>
+
+    <sql id="emp_columnInsert">
+        (empno,ename,job,mgr,sal,comm,deptno,hiredate)
+    </sql>
+
+    <sql id="emp_column">
+        empno,ename,job,mgr,sal,comm,deptno,hiredate
+    </sql>
+
+    <sql id="emp_columnAs">
+      empno as 'empno',
+      ename as 'ename',
+      job as 'job',
+      mgr as 'mgr' ,
+      sal as 'sal',
+      comm as 'common',
+      deptno as 'deptno',
+      hiredate as 'hiredate'
+    </sql>
+
+
+    <insert id="insertScottEMp" parameterType="com.soyanga.mybatis.entity.ScottEmp"
+            useGeneratedKeys="true" keyColumn="deptno" keyProperty="deptno">
+        insert into emp
+
+        <include refid="emp_columnInsert"/>
+
+        values
+        (
+        #{empno},#{ename},#{job},#{mgr},#{sal},#{common},#{deptno},#{hiredate}
+        )
+
+    </insert>
+
+    <!--更新    flushCache="false"  使用该SQL语句不会刷新缓存-->
+    <update id="updateScottEmp" flushCache="false">
+        update emp
+        set hiredate = #{hiredate}
+        where empno = #{empno}
+    </update>
+
+    <update id="updateScottEmpByObject" parameterType="com.soyanga.mybatis.entity.ScottEmp">
+        update emp
+        set hiredate = #{hiredate}
+        where empno = #{empno}
+    </update>
+
+    <delete id="deleteScottEmpByEmpno">
+        delete from emp  where empno = #{empno}
+    </delete>
+
+    <select id="queryScottEmpByEmpno" resultMap="scottEmpMap">
+        select
+        <include refid="emp_columnAs"/>
+        from emp
+        where empno = #{empno}
+    </select>
+
+    <select id="queryScottEmpByEmpnoReturnHashMap" resultType="hashmap">
+        select
+        <include refid="emp_column"/>
+        from emp
+        where empno = #{empno}
+    </select>
+
+    <select id="queryScottEmpAll" resultMap="scottEmpMap">
+        select
+        <include refid="emp_columnAs"/>
+        from emp
+    </select>
+
+    <select id="queryScottAllReturnHashMap" resultType="hashmap">
+        select
+        <include refid="emp_column"/>
+        from emp
+    </select>
+
+    <!--pageSize 每一页的个数  pageOffSet 偏移量-->
+    <select id="queryScottEmpByDivPage" resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+        order by ${orderColumnName} desc
+        limit #{pageSize} offset #{pageOffset}
+    </select>
+
+    <!--利用page对象进行传参-->
+    <select id="queryScottEmpByDivPageObject" resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+        order by ${orderColumnName} desc
+        limit #{pageSize} offset #{pageOffset}
+    </select>
+
+    <select id="queryScottEmpWhithdeptnoAndLikeJob" resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+        where deptno=20
+        <if test="job!=null and job!= '' ">
+            and job like #{job}
+        </if>
+    </select>
+
+    <select id="queryScottEmpWhithdeptnoAndLikeJobAndLikeEname" resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+        where deptno=20
+        <if test="job!=null and job!= '' ">
+            and job like #{job}
+        </if>
+        <if test="ename!=null">
+            and ename like #{ename}
+        </if>
+
+    </select>
+
+    <select id="queryScottEmpWhithdeptnoAndLikeJobAndLikeEname2"
+            resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+
+        <!--<where>-->
+        <!--<if test="deptno!=null">-->
+        <!--deptno = #{deptno}-->
+        <!--</if>-->
+
+        <!--<if test="job!=null and job!= '' ">-->
+        <!--and job like #{job}-->
+        <!--</if>-->
+
+        <!--<if test="ename!=null">-->
+        <!--and ename like #{ename}-->
+        <!--</if>-->
+        <!--</where>-->
+
+        <!--将where后的语句中所偶有以and 或者 or结尾或开头的标签都去掉-->
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="deptno!=null">
+                deptno = #{deptno}
+            </if>
+
+            <if test="job!=null and job!= '' ">
+                and job like #{job}
+            </if>
+
+            <if test="ename!=null">
+                and ename like #{ename}
+            </if>
+        </trim>
+    </select>
+
+    <!--choose when otherwise 相当于SwitchCase case default-->
+    <select id="queryScottEmpWhithDeptnoAndLikeJobOrEname"
+            resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+        <where>
+            deptno = 20
+            <choose>
+                <when test="job!=null">
+                    and job = #{job}
+                </when>
+                <when test="ename!=null">
+                    and ename = #{ename}
+                </when>
+                <otherwise>
+                    and empno = 7788
+                </otherwise>
+            </choose>
+        </where>
+
+    </select>
+
+    <update id="updateScottEmpByObjectWithSet" parameterType="com.soyanga.mybatis.entity.ScottEmp">
+        update emp
+        <!--<trim prefix="set" suffixOverrides=",">-->
+        <!--<if test="hiredate!=null">-->
+        <!--hiredate = #{hiredate},-->
+        <!--</if>-->
+        <!--<if test="ename!=null">-->
+        <!--ename = #{ename},-->
+        <!--</if>-->
+        <!--</trim>-->
+        <set>
+            <if test="hiredate!=null">
+                hiredate = #{hiredate},
+            </if>
+            <if test="ename!=null">
+                ename = #{ename},
+            </if>
+        </set>
+        where empno = #{empno}
+    </update>
+
+    <select id="queryScottempByList" parameterType="list" resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+        <where>
+            deptno in
+            <foreach collection="list"
+                     open="(" separator="," close=")"
+                     index="index" item="item">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+
+    <select id="queryScottempByArray" parameterType="integer[]" resultMap="scottEmpMap">
+
+        select
+        <include refid="emp_column"/>
+        from emp
+        <where>
+            deptno in
+            <foreach collection="array"
+                     open="(" separator="," close=")"
+                     index="index" item="item">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="queryScottempByMap" resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+        <where>
+            <if test="ename!=null">
+                ename like #{ename}
+            </if>
+
+            <if test="deptnos!=null">
+                and deptno in
+                <foreach collection="deptnos"
+                         open="(" separator="," close=")"
+                         index="index" item="item">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+
+    <select id="queryScottEmpByDivPage3" resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+    </select>
+
+
+    <!--hiredate between #{startTime} and #{endTime} -->
+    <select id="queryScottempByCreatTime" resultMap="scottEmpMap">
+        select
+        <include refid="emp_column"/>
+        from emp
+        <where>
+            <if test="startTime!=null">
+                hiredate &gt;= #{startTime}
+            </if>
+            <if test="endTime!=null">
+                and hiredate &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>
