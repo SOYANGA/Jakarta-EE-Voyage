@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <!--1.构造方法实例化Bean对象-->
+    <!--Bean的实例化方法1，无参构造不需要传入参数-->
+    <bean id="exampleBean" class="com.github.soyanga.ExampleBean"/>
+
+    <!--Bean的实例化 ，有参构造需要给构造方法传入参数-->
+    <bean id="exampleBean2" class="com.github.soyanga.ExampleBean2">
+        <constructor-arg value="hello spring core"/>
+    </bean>
+
+    <!--2.静态工厂实例化Bean对象（类/静态方法）-->
+    <bean id="clientService" class="com.github.soyanga.ClientService" factory-method="getInstance"/>
+
+    <!--3.实例工厂方法实例化（对象方法）-->
+    <bean id="defaultClientServiceLocator" class="com.github.soyanga.DefaultClientServiceLocator"/>
+    <bean id="clientService2" factory-bean="defaultClientServiceLocator" factory-method="getClientService"/>
+
+    <!--3.1Bean的装配-->
+    <!--3.1.1.Bean的构造方法参数装配-->
+    <!--第一种：Bean的引用-->
+    <bean id="bar" class="com.github.soyanga.Bar"/>
+
+    <bean id="baz" class="com.github.soyanga.Bazz"/>
+    <bean id="foo" class="com.github.soyanga.Foo">
+        <constructor-arg ref="bar"/>
+        <constructor-arg ref="baz"/>
+    </bean>
+    <!--第二种：根据构造参数类型-->
+    <bean id="foo1" class="com.github.soyanga.Foo">
+        <constructor-arg type="com.github.soyanga.Bazz" ref="baz"/>
+        <constructor-arg type="com.github.soyanga.Bar" ref="bar"/>
+    </bean>
+
+    <bean id="exampleBean3" class="com.github.soyanga.ExampleBean3">
+        <constructor-arg type="int" value="20"/>
+        <constructor-arg type="java.lang.String" value="张三"/>
+    </bean>
+    <!--第三种：根据构造方法参数位置-->
+    <bean id="exampleBean4" class="com.github.soyanga.ExampleBean3">
+        <constructor-arg index="0" value="25"/>
+        <constructor-arg index="1" value="李四"/>
+    </bean>
+
+    <!--第四种：根据构造参数名称-->
+    <bean id="exampleBean5" class="com.github.soyanga.ExampleBean3">
+        <constructor-arg name="age" value="26"/>
+        <constructor-arg name="name" value="王五"/>
+    </bean>
+
+    <!--3.1.2.Setter方式给属性装配-->
+    <bean id="rectangle" class="com.github.soyanga.Rectangle"/>
+
+    <bean id="complexShape" class="com.github.soyanga.ComplexShape">
+        <property name="shape" ref="rectangle"/>
+    </bean>
+
+    <!--直接复制装配以及实例化 commons-dbcp2   destroy-method = 执行完进行销毁-->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <!--驱动-->
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <!--url-->
+        <property name="url" value="jdbc:mysql://localhost:3306/scott"/>
+
+        <property name="username" value="root"/>
+        <property name="password" value="123456789"/>
+        <!--最大连接数 int类型-->
+        <property name="maxTotal" value="10"/>
+    </bean>
+
+    <!--idref(单纯引用Bean的id) 和 ref 区别-->
+    <bean id="idref" class="com.github.soyanga.Idref">
+        <constructor-arg>
+            <idref bean="bar"/>
+        </constructor-arg>
+    </bean>
+
+    <!--内部Bean -->
+    <!--<bean id="foo2" class="com.github.soyanga.Foo">-->
+    <!--<constructor-arg>-->
+    <!--<bean class="com.github.soyanga.Bar"/>-->
+    <!--</constructor-arg>-->
+    <!--<constructor-arg>-->
+    <!--<bean class="com.github.soyanga.Bazz"/>-->
+    <!--</constructor-arg>-->
+    <!--</bean>-->
+
+    <!--Collection集合元素的使用-->
+    <bean id="complexObject" class="com.github.soyanga.ComplexObject">
+        <property name="properties">
+            <props>
+                <prop key="admin">admin@126.com</prop>
+                <prop key="soyanga">soyanga@126.com</prop>
+                <prop key="bing">bing@126.com</prop>
+            </props>
+        </property>
+        <property name="list">
+            <list>
+                <value>java</value>
+                <null/>
+                <idref bean="idref"/>
+                <value>20</value>
+            </list>
+        </property>
+        <property name="set">
+            <set>
+                <value>50ddd</value>
+                <value>100sdasd</value>
+            </set>
+        </property>
+
+        <property name="map">
+            <map>
+                <entry key="sss" value="wwwww"/>
+                <!--<entry key="s85" value-ref="foo2"/>-->
+                <entry key="ada" value-ref="dataSource"/>
+                <entry>
+                    <key>
+                        <null/>
+                    </key>
+                    <value>
+                        aaaaaaaaaaaaaa
+                    </value>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <!--null和空字符串-->
+    <bean id="exampleEmail" class="com.github.soyanga.ExampleEmail" scope="prototype">
+        <property name="email" value=""/>
+        <property name="name">
+            <null/>
+        </property>
+    </bean>
+
+    <!--Lazy-initialized 延迟初始化，懒加载   注解@Lazy-->
+    <bean id="lazyInitExample" class="com.github.soyanga.lazyInitExample" lazy-init="true">
+    </bean>
+
+    <!--自动装配 构造方法 调用的是byType-->
+    <bean id="customer" class="com.github.soyanga.Customer" autowire="constructor"/>
+
+    <!--自动装配 属性byName-->
+    <bean id="customer2" class="com.github.soyanga.Customer2" autowire="byName"/>
+
+    <!--自动装配 属性byType-->
+    <bean id="customer3" class="com.github.soyanga.Customer2" autowire="byType"/>
+
+    <!--自定义作用域添加配置-->
+    <bean id="simpleThreadScope" class="com.github.soyanga.MyScope.SimpleThreadScope"/>
+
+    <bean id="customScopeConfigurer" class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+        <property name="scopes">
+            <map>
+                <entry key="thread" value-ref="simpleThreadScope"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="exampleEmail2" class="com.github.soyanga.ExampleEmail" scope="thread">
+        <property name="email" value=""/>
+        <property name="name">
+            <null/>
+        </property>
+    </bean>
+
+    <!--注解配置bean-->
+    <bean id="chineseCurrency" class="com.github.soyanga.auto.ChineseCurrency">
+    </bean>
+
+    <!--添加Bean的注解扫描-->
+    <context:component-scan base-package="com.github.soyanga.auto">
+
+    </context:component-scan>
+</beans>
