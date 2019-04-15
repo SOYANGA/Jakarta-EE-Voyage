@@ -6,7 +6,7 @@
 2. 掌握Bean的初始化
 3. 掌握Bean的依赖装配
 4. 了解Bean的作用域
-5. 了解Bean的声明周期
+5. 了解Bean的生命周期
 
 ## 1.Ioc容器构建
 
@@ -94,7 +94,7 @@ ApplicationContext context = new ClassPathXmlApplicationContext("application-con
   
   /**
    * @program: springcore-case-IoC
-   * @Description: 配置类 跟业务逻辑无关联，主要是配置Bean的实例化
+   * @Description: Ioc容器 配置类 跟业务逻辑无关联，主要是配置Bean的实例化
    * @Author: SOYANGA
    * @Create: 2019-04-10 16:46
    * @Version 1.0
@@ -220,7 +220,7 @@ xml配置中添加`factory-method`
 
 ### 2.3实例工厂方法实例化（对象方法）
 
-实例工厂方法和静态工厂方法比较相似，区别在于实例工厂方法是通过**已经在容器中的Bean**通过其他方法实例化一个新的Bean。
+实例工厂方法和静态工厂方法比较相似，区别在于实例工厂方法是通过**已经在容器中的Bean**通过其他方法实例化一个新的Bean。 简称：Bean中Bean
 
 ```java
 package com.github.soyanga;
@@ -353,7 +353,7 @@ public ExampleBean3(int age, String name) {
 
 ####  3.1.2 Setter方法装配
 
-容器在调用无参构造方法或者无参工厂方法实例化Bena之后，调用Seyyer方法完成属性的装配
+容器在调用无参构造方法或者无参工厂方法实例化Bena之后，调用Setter方法完成属性的装配
 
 ```
 public class Rectangle implements Shape {
@@ -611,7 +611,196 @@ Spring默认容器启动时将所有Bean都初始化完成，设置延时初始�
 
 在课程前面我们都讲的时手工完成Bean之间的一依赖关系的建立（装配），Spring还提供了自动装配的能力，Spring的自动咋装配的功能定义：无需再Spring配置文件中描述Bean之间的依赖关系(如配置`<property>,<constructor-arg>`),IoC容器会自动建立Bean之间的依赖关系。
 
-```
+```java
+public class Customer {
+    private final Bar bar;
+
+    public Customer(Bar bar) {
+        this.bar = bar;
+    }
+
+    public Bar getBar() {
+        return bar;
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "bar=" + bar +
+                '}';
+    }
+}
+
+public class Customer2 {
+    private Bar bar;
+
+    public Bar getBar() {
+        return bar;
+    }
+
+    public void setBar(Bar bar) {
+        this.bar = bar;
+    }
+
+    @Override
+    public String toString() {
+        return "Customer2{" +
+                "bar=" + bar +
+                '}';
+    }
+}
 
 ```
+
+```xml
+    <!--自动装配 构造方法 调用的是byType-->
+    <bean id="customer" class="com.github.soyanga.Customer" autowire="constructor"/>
+
+    <!--自动装配 属性byName-->
+    <bean id="customer2" class="com.github.soyanga.Customer2" autowire="byName"/>
+
+    <!--自动装配 属性byType-->
+    <bean id="customer3" class="com.github.soyanga.Customer2" autowire="byType"/>
+```
+
+## 4.Bean的作用域
+
+Bean的作用域是描述一个Bean实例在Spring IoC容器的存在状态，比如根据不同请求，线程而存在多个。
+
+**Singleton:**
+
+- 描述：该作用域下的Bean在IoC容器中只存在一个实例，所有对象对其的引用都返回同一个
+- 场景：无状态的Bean使用该作用域
+- Spring默认选择该作用域
+
+![1555259862478](C:\Users\32183\AppData\Roaming\Typora\typora-user-images\1555259862478.png)
+
+**Prototype:**
+
+- 描述：每次对该作用域下的Bean的请求都会创新的实例
+- 场景：有状态的Bean使用该作用域
+
+![1555259936004](D:\婕\JavaEE学习之路\Spring\picture\1555259936004.png)
+
+**request** httpService 
+
+描述：每次http请求会创建新的Bean实例，类似于prototype 
+
+场景：一次http的请求和响应的共享Bean 
+
+备注：限定SpringMVC中使用
+
+
+
+**session** httpSession
+
+- 描述：在一个http session中，定义一个Bean实例 
+
+- 场景：用户回话的共享Bean, 比如：记录一个用户的登陆信息 
+
+- 备注：限定SpringMVC中使用
+
+
+
+**global session** 门户网站
+
+- 描述：类似与http session，但限于protlet web应用可用 
+
+- 场景：所有构成某个portlet web应用的各种不同的portlet所共享 
+
+- 备注：限定protlet web应用，你在编写一个标准的基于Servlet的web应用，并且定义了一个或多个具有 global session作用域的bean，http session作用域，并且不会引起任何错误 
+
+
+
+**application session**   域对象
+
+- 描述：在一个http servlet Context中，定义一个Bean实例 
+
+- 场景：Web应用的上下文信息，比如：记录一个应用的共享信息 
+
+- 备注：限定SpringMVC中使用 
+
+## 5.基于注解配置
+
+无论是通过XML还是注解配置，它们都是表达Bean定义的载体，其本质都是为Spring容器提供Bean定义的信息。 在表现形式上都是将XML定义的内容通过注解进行描述。 
+
+Spring容器启动成功的三大要素： 
+
+- Bean定义信息
+- Bean实现类
+- Spring本身
+
+### 5.1使用注解定义Bean
+
+采用基于XML的配置，则Bean定义信息和Bean实现类本身分离的
+
+采用基于注解的配置文件，则Bean的定义信息是通过Bean实现类上标注注解实现的。
+
+
+
+#### Bean的标识
+
+标识一个类，可以被Spring容器识别，自动转为被容器管理的Bean。
+
+@Component注解标识的类：表明是一个普通的Bean
+
+@Repository注解标识的类：用户DAO实现了进行标识
+
+@Servicr:用于Service实现类进行标识
+
+@Contronller:用于Contorller实现类进行标识
+
+这几个标识的本质是相同的均表明类被标识，分别设置主要是为了标识类的用途，使我们可以一眼看出Bean的用途。
+
+
+
+### 5.2使用注解装配
+
+#### 5.2.1@Autowired自动装配
+
+@Autowired实现Bean的注入，基础类型默认是按照(byType)匹配的方式在容器中查找匹配的Bean,当有且仅有一个匹配的Bean时，Spring将其注入@Autowired标注的变量中（引用类型）
+
+@Autorwired的required属性值默认为true,如果容器中没有找到标注变量类型的匹配的Bean,那么Spring容器启动时将报`NoSuchBeanDefintionException`异常。如果希望Spring及时找不到匹配的Bean完成注入时也不要抛出异常，那么可以使用@Autowired(required=false)进行标志
+
+#### 5.2.2@Qualifier注入指定Bean
+
+加入容器中的三个类型Shapr的Bean,分别为：cuirclar,rectangle,triangle,则上面代码中注入一个circular的Bean。
+
+#### 5.2.3@Scope,@PostConstruct,@PreDestory
+
+@Scope:标识Bean的生命作用域
+
+@PostConstruct:标识Bean的初始化之后调用的方法 java的类
+
+@PreDesyory:标识Bean的销毁之前调用的方法  java的类
+
+```java
+@Component @Scope(scopeName = "prototype") 
+public class CardComponent {        
+	@PostConstruct    
+	public void init() {        
+		System.out.println("Bean初始化之后调用");    
+	}        
+	@PreDestroy    
+	public void destroy() {        
+		System.out.println("Bean销毁之前调用");    
+	} 
+}
+```
+
+上面的注解方式等价与XML中的配置
+
+```xml
+<bean class="com.bittech.common.component.CardComponent" scope="prototype" initmethod="init" destroy-method="destroy"/>
+```
+
+## 6.Bean的配置比较
+
+
+
+配置应用场景比较
+
+| 配置方式 | 基于XML配置                                                  | 基于注解配置                                                 | 基于Java类配置（IoC容器）                                    |
+| -------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 适用场景 | Bean实现类来源第三方类库，如DataSource等，因此无法在类中标注注解，所以通过XML配置方式较好。 | Bean的实现类是当前项目开发的，且可以直接在Java类中使用基于注解的配置 | 基于Java的类配置优势在于可以通过代码方式控制Bean初始化的整体逻辑，如果实例化Bean的逻辑比较复杂，则比较适应基于Java类配置的方式 |
 
