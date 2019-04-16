@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <context:component-scan base-package="com.github.soyanga.spel.pojo"/>
+
+    <!--调用java.lang.Math.random()静态方法装配属性 SpEL语法-->
+    <bean id="guessNumber" class="com.github.soyanga.spel.pojo.GuessNumber" scope="prototype">
+        <property name="number" value="#{T(java.lang.Math).random()}"/>
+    </bean>
+
+
+    <!--&lt;!&ndash;内置Bean ->系统属性Bean systemProperties  &ndash;&gt;-->
+    <!--<bean id="systemPropertiesBean" class="com.github.soyanga.spel.pojo.SystemPropertiesBean">-->
+    <!--<property name="classPath" value="#{systemProperties['java.class.path']}"/>-->
+    <!--<property name="javaHome" value="#{systemProperties['java.home']}"/>-->
+    <!--<property name="javaVersion" value="#{systemProperties['java.version']}"/>-->
+    <!--<property name="osName" value="#{systemProperties['os.name']}"/>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash;内置Bean -> 系统环境变量Bean SystemEnvironment&ndash;&gt;-->
+    <!--<bean id="systemEnvironmentBean" class="com.github.soyanga.spel.pojo.SystemEnvironmentBean">-->
+    <!--<property name="appData" value="#{systemEnvironment['APPDATA']}"/>-->
+    <!--<property name="path" value="#{systemEnvironment['Path']}"/>-->
+    <!--<property name="systemDriver" value="#{systemEnvironment['SystemDirver']}"/>-->
+    <!--</bean>-->
+
+    <!--将静态资源 属性文件包装成一个Bean-->
+    <util:properties id="properties" location="database.properties"/>
+
+
+    <!--占位符方式-->
+    <!--资源配置文件 Spring提供的类PropertyPlaceholderConfigurer   单文处理-->
+    <!--<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">-->
+    <!--<property name="fileEncoding" value="UTF-8"/>-->
+    <!--<property name="location" value="config.properties"/>-->
+    <!--</bean>-->
+
+    <!--多文件处理 合并两个文件属性 -->
+    <!--<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">-->
+        <!--<property name="fileEncoding" value="UTF-8"/>-->
+        <!--<property name="locations">-->
+            <!--<list>-->
+                <!--<value>classpath:database.properties</value>-->
+                <!--<value>classpath:config.properties</value>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!--用元素标签使用占位符-->
+    <context:property-placeholder file-encoding="UTF-8"
+                                  location="classpath:config.properties,classpath:database.properties"/>
+
+
+</beans>
