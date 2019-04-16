@@ -296,24 +296,233 @@ public class SpELMathodApplication {
 
 Spring中内置了`SystemProperties`和`SystemEnvironment`两个Bean,可以通过它们分别获取系统属性变量值和系统环境变量值。
 
+> System.getProperties()；方法获取系统属性 
+>
+> System.getenv()；方法获取系统环境变量
+
+```xml
+    <!--内置Bean ->系统属性Bean systemProperties  -->
+    <bean id="systemPropertiesBean" class="com.github.soyanga.spel.pojo.SystemPropertiesBean">
+        <property name="classPath" value="#{systemProperties['java.class.path']}"/>
+        <property name="javaHome" value="#{systemProperties['java.home']}"/>
+        <property name="javaVersion" value="#{systemProperties['java.version']}"/>
+        <property name="osName" value="#{systemProperties['os.name']}"/>
+    </bean>
+
+    <!--内置Bean -> 系统环境变量Bean SystemEnvironment-->
+    <bean id="systemEnvironmentBean" class="com.github.soyanga.spel.pojo.SystemEnvironmentBean">
+        <property name="appData" value="#{systemEnvironment['APPDATA']}"/>
+        <property name="path" value="#{systemEnvironment['Path']}"/>
+        <property name="systemDriver" value="#{systemEnvironment['SystemDirver']}"/>
+    </bean>
+```
+
+```java
+//内置系统属性Bean
+SystemPropertiesBean systemPropertiesBean = (SystemPropertiesBean) context.getBean("systemPropertiesBean");
+System.out.println(systemPropertiesBean);
+
+//内置系统环境Bean
+SystemEnvironmentBean systemEnvironmentBean = (SystemEnvironmentBean) context.getBean("systemEnvironmentBean");
+System.out.println("\n\n" + systemEnvironmentBean);
+
+```
+
 #### 1.3.2基于注解的配置
 
+**`@Value`**注解可以标注在**类中的属性，方法，构造函数上**。下面是一个从配置文件中加载一个参数值的示例。
 
+- 配置文件
+
+  ```properties
+  #配置文件：database.properties 
+  url=jdbc:mysql://localhost:3306/memo 
+  username=root 
+  password=root 
+  classname=com.mysql.jdbc.Driver
+  ```
+
+- 在XML中配置一个Id为`properties`的Bean用来加载配置文件
+
+  ```xml
+  <!-- 开启自动扫描 --> <context:component-scan base-package="com.bittech.example"/>
+   
+  <util:properties id="properties" location="database.properties"/
+  ```
+
+- 在Bean中通过@Value注解注入
+
+  ```java
+  @Data
+  @Component
+  public class MyDataSource {        
+  	@Value(value = "#{properties['url']}")    
+  	private String url;
+      
+  	@Value(value = "#{properties['username']}")    
+  	private String username;
+      
+  	@Value("#{properties['password']}")    
+  	private String password;
+      
+  	@Value("#{properties['classname']}")   
+  	private String classname;        
+  }
+  ```
+
+Spring提供了另一种更为简便的方式占位符的方式。
 
 ## 2.资源配置文件
 
+我们在配置Bean的属性时，大多数情况下值基本是固定的。这样就存在一个问题，在配置例如数据库的用户名，密码；邮箱用户名 密码；以及一些编码阶段不可预知的信息（支付宝AppId私钥，公钥），这个时候我们就需要外置资源文件来解决这个问题。
 
+例如将上述properties文件的内容修改一下，让其变的直观
+
+```properties
+#配置文件：database.properties
+jdbc.url=jdbc:mysql://localhost:3306/Scott
+jdbc.username=root
+jdbc.password=123456789
+jdbc.driverclass=com.mysql.jdbc.Driver
+
+pay.alipay.id=
+pay.weixin.id=
+
+email.host=
+email.port=
+email.username=
+email.password=
+```
 
 ### 2.1 使用PropertyPlaceholderConﬁgure配置属性文件 
+
+- 单个资源文件
+
+```xml
+    <!--资源配置文件 Spring提供的类PropertyPlaceholderConfigurer   单文处理-->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="fileEncoding" value="UTF-8"/>
+        <property name="location" value="config.properties"/>
+    </bean>
+```
+
+- 多个资源文件
+
+  ```xml
+      <!--多文件处理 合并两个文件属性 -->
+      <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+          <property name="fileEncoding" value="UTF-8"/>
+          <property name="locations">
+              <list>
+                  <value>classpath:database.properties</value>
+                  <value>classpath:config.properties</value>
+              </list>
+          </property>
+      </bean>
+  ```
 
 
 
 ### 2.2使用 `context:property-placeholder` 配置属性文件 
 
+```xml
+<!--用元素标签使用占位符-->
+<context:property-placeholder file-encoding="UTF-8" location="config.properties,database.properties"/>
+```
 
+以上配置相当于在Spring容器中配置了一个 PropertyPlaceholderConfigurer 的Bean，显然这种方式更为优雅。
 
 ### 2.3使用@Value注解给Bean的属性注入值 
 
+```java
+@Component
+@Data
+public class MyDataSource2 {
 
+    @Value(value = "${jdbc.url}")
+    private String url;
+
+    @Value(value = "${jdbc.username}")
+    private String userName;
+
+    @Value(value = "${password}")
+    private String passWord;
+
+    @Value(value = "${jdbc.driverclass}")
+    private String driverClass;
+}
+```
 
 ### 2.4 Spring资源接口 
+
+我们在使用Spring框架过程中，离不开和各类资源文件打交道，这些资源文件有来自本地文件，有来自一个jar，也有来自一个URL。因为JDK操作底层资源基本上是从`java.net.URL, java.io.File, java.util.Properties`这些类开始，获取资源要么是从绝对路径，要么就是当前类的相对路径。从类路径和web容器上下文中获取资源是很不方便的。Spring的Resource接口提供了统一的访问底层资源的能力。
+
+Resource接口的实现类结构图：
+
+![1555421823885](D:\婕\JavaEE学习之路\Spring\picture\1555421823885.png)
+
+> 面向接口编程
+>
+> 策略模式
+
+- ByteArrayResource ： 代表 byte[] 数组资源， getInputStream 将返回一个ByteArrayInputStream 。 ByteArrayResource 可**多次读取**数组资源，即 isOpen () 永远返回 false 。
+- InputStreamResource ： 代表 java.io.InputStream 字节流，对于 getInputStream 操作将直接返回该字节流，因此只能**读取一次**该字节流，即 isOpen 永远返回 true 。 
+- FileSystemResource ： 代表 java.io.File资源，对于getInputStream操作将返回底层文件的字节流，isOpen 将永远返回false ，从而表示**可多次读取底层文件**的字节流。 
+- ClassPathResource ：代表 classpath 路径的资源，将使用 ClassLoader 进行加载资源。classpath 资源存在于类路径中的文件系统中或jar包里，且 isOpen 永远返回 false ，表示**可多次读取资源**。 ClassPathResource 加载资源替代了Class类和ClassLoader类的 getResource(String name) 和 **getResourceAsStream(String name) 两个加载类路径资源方法，提供一致的访问方式。**
+
+了解Spring资源接口实现类之后，可以通过文件名的前缀来动态决定加载资源时使用的实现类（实际Spring也是通 过这种方式来实现资源的加载时策略的选择）。
+
+```java
+public class SpringResourceApplication {
+
+    //file:D:/db.properties   file:linux--> /home/lisan/db.propertoes
+    // http://www.zhangsan.com/files/db.propertoes
+    //classpath:com/soyanga/db.propertoes
+    //classpath:db.propertoes
+
+    /**
+     * file:D:/db.properties   file:linux--> /home/lisan/db.propertoes
+     * http://www.zhangsan.com/files/db.propertoes
+     * classpath:com/soyanga/db.propertoes
+     * classpath:db.propertoes
+     * 通过文件名去判定资源所属的具体的Resource类
+     *
+     * @param filename 如上
+     * @return 文件加载输入流
+     */
+    public static Resource loadResource(String filename) {
+        if (filename == null || filename.length() == 0) {
+            return null;
+        }
+        if (filename.startsWith("file")) {
+            return new FileSystemResource(filename.substring("file:".length()));
+        }
+        if (filename.startsWith("classpath")) {
+            return new ClassPathResource(filename.substring("classpath".length()));
+
+        }
+        if (filename.startsWith("http") || filename.startsWith("ftp")) {
+            try {
+                return new UrlResource(filename);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Resource resource = loadResource("http://www.zhangsan.com/files/db.propertoes");
+        System.out.println(resource);
+
+    }
+}
+```
+
+
+
+| 知识块   | 知识点                                |
+| -------- | ------------------------------------- |
+| SpEL     | 1.SpEL核心接口 <br>2. SpEL基本使用    |
+| 资源配置 | 1. 资源接口实现类 <br>2. 属性文件配置 |
+
