@@ -8,7 +8,7 @@ import java.lang.reflect.Proxy;
 
 /**
  * @program: springcore-case-AOP
- * @Description:
+ * @Description: JDK动态代理--实现AOP
  * @Author: SOYANGA
  * @Create: 2019-04-17 21:26
  * @Version 1.0
