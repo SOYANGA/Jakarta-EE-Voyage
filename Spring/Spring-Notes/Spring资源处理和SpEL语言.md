@@ -347,7 +347,7 @@ System.out.println("\n\n" + systemEnvironmentBean);
   ```xml
   <!-- 开启自动扫描 --> <context:component-scan base-package="com.bittech.example"/>
    
-  <util:properties id="properties" location="database.properties"/
+  <util:properties id="properties" location="database.properties"/>
   ```
 
 - 在Bean中通过@Value注解注入
