@@ -1,4 +1,4 @@
-package com.github.soyanga.aopexample.impl;
+package com.github.soyanga.aopexample.impl.case5;
 
 import com.github.soyanga.aopexample.PayService;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
  * @Create: 2019-04-17 17:34
  * @Version 1.0
  */
-@Service
+
+@Service("alipayService")
 public class AlipayServiceImpl implements PayService {
 
     @Override
@@ -23,5 +24,8 @@ public class AlipayServiceImpl implements PayService {
         //3-A 支付开始时间
         //3.核心支付逻辑 ------>减钱
         //3—-B 支付结束时间
+
+        System.out.println("AlipayServiceImpl");
+        throw new RuntimeException("Exception");
     }
 }

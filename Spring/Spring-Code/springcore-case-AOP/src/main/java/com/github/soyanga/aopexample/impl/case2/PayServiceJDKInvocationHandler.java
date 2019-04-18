@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 
 /**
  * @program: springcore-case-AOP
- * @Description: AOP动态代理
+ * @Description: AOPJDK动态代理
  * @Author: SOYANGA
  * @Create: 2019-04-17 20:50
  * @Version 1.0

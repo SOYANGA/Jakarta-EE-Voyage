@@ -1,6 +1,7 @@
 package com.github.soyanga.aopexample.impl;
 
 import com.github.soyanga.aopexample.PayService;
+import org.springframework.stereotype.Service;
 
 /**
  * @program: springcore-case-AOP
@@ -9,6 +10,7 @@ import com.github.soyanga.aopexample.PayService;
  * @Create: 2019-04-17 17:34
  * @Version 1.0
  */
+@Service
 public class WeixinPayServiceImpl implements PayService {
     @Override
     public void pay() {

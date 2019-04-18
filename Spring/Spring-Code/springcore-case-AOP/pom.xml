@@ -39,6 +39,13 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
+        <!--Spring添加切面的依赖-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+            <version>4.3.9.RELEASE</version>
+        </dependency>
+
 
         <!--commons-dbcp2数据库连接池-->
         <dependency>

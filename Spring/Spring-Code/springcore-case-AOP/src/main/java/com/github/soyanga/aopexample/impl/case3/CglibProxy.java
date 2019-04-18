@@ -9,7 +9,7 @@ import org.springframework.cglib.proxy.Enhancer;
 
 /**
  * @program: springcore-case-AOP
- * @Description:
+ * @Description: Cglib 动态代理
  * @Author: SOYANGA
  * @Create: 2019-04-17 23:55
  * @Version 1.0
