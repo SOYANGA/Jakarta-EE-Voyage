@@ -73,7 +73,7 @@ SpringJDBC异常类（部分异常）
 
 ### 1.3数据访问模板化
 
-Spring将数据库访问过程中固定的和可变的部分明确划分为两个不同的类：模板(template)和回调(callback)。
+Spring将数据库访问过程中**固定的和可变的**部分明确划分为两个不同的类：**模板(template)**和**回调(callback)。**
 
 模板管理过程中固定的风各，而回掉处理自定义的数据访问代码。
 
@@ -107,7 +107,375 @@ Spring为提供数据源连接池的实现，我们可以通过其他开源实�
 
 这些数据库连接池大多都能配置为Spring的数据源，在一定程度上与Spring自带的DriverManagerDataSource或者SingleConnectionDataSource很类似。
 
+```xml
+        <!--阿里 druid数据库连接池-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.1.2</version>
+        </dependency>
 ```
+
+```xml
+<!--获取数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+
+        <!--连接池的连接配置 初始化大小， 最小，最大-->
+        <property name="initialSize" value="10"/>
+        <property name="maxActive" value="20"/>
+        <property name="minIdle" value="10"/>
+        <property name="queryTimeout" value="5"/>
+
+        <!--配置获取连接等待超时的时间-->
+        <property name="maxWait" value="10000"/>
+        <!--配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒-->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <!--配置一个连接在连接池中最生存时间，单位是毫秒-->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+
+        <property name="validationQuery" value="SELECT 'x' FROM DUAL"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+
+        <!--打开PSCache ,并且指定每个连接上·PSCache的大小，如果Oracle,则把poolPreparedstatements
+        配置为true,mysql可以配置为false-->
+        <property name="poolPreparedStatements" value="false"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20"/>
+
+    </bean>
+</beans>
+```
+
+### 2.2JDBC驱动的数据源
+
+在Spring中，通过JDBC驱动定义数据源是最简单的配置方式，SpringJDBC位于Spring-jdbc模板下：
+
+```
+<!--Spring JDBC-->
+<dependency>
+     <groupId>org.springframework</groupId>
+     <artifactId>spring-jdbc</artifactId>
+</dependency>
+```
+
+Spring提供了三个这样的数据源（位于包:`org.Spirngframework,jdbc.dataSource`下）。
+
+- `DriverMangerDataSource`：在每个连接请求时都会返回一个新建的连接。与Druid的DruidDataSource不同，由DriverMangerDataSource提供的连接**并没有进行池化管理**。
+
+- `SimpleDriverDataSource`:与DriverManagerDataSource的工作方式类似，但是**直接使用JDBC驱动，来解决在特定环境下的类加载问题**，这样的环境包括**OSGI容器**。
+- `SingleConnectionDataSource`：在每个连接请求时都会返回同一个连接，尽管SingleConnectionDataSource不是严格意义上的连接池数据源，但是可以将其视为**只有一个连接的池**。
+
+DriverManagerDataSource配置：
+
+```xml
+    <!--通过驱动获取数据源-->
+    <bean id="driverManagerDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+```
+
+与具备池功能的数据源相比，唯一区别在于这**些数据源Bean都没有提供连接池的功能，所以没有可配置的池相关的属性**。
+
+## 3Spring中使用JDBC
+
+### 3.1JDBC代码--JavaSE中学习的JDBC
+
+```sql
+-- 创建数据库 create database if not exists `library` default character set utf8; 
+-- 创建表 create table if not exists `soft_bookrack` (  
+`book_name` varchar(32) NOT NULL,  
+`book_author` varchar(32) NOT NULL,  
+`book_isbn` varchar(32) NOT NULL primary key 
+) ;
+```
+
+
+
+```java
+@Component
+public class JdbcOperation {
+    private final DataSource dataSource;
+
+    public JdbcOperation(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    /**
+     * 添加一本书
+     */
+    public void addBook() {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            //创建连接
+            connection = dataSource.getConnection();
+            //创建命令
+            statement = connection.prepareStatement
+                    ("insert into `soft_bookrack` (book_name, book_author, book_isbn) values (?, ?, ?)");
+            //赋值参数
+            statement.setString(1, "Spring in Action");
+            statement.setString(2, "Craig Walls");
+            statement.setString(3, "9787115417305");
+            //执行语句
+            int effect = statement.executeUpdate();
+            System.out.println("Execute Result " + effect);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * 更新一本书
+     */
+    public void updateBook() {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            //创建连接
+            connection = dataSource.getConnection();
+            //创建命令
+            statement = connection.prepareStatement
+                    ("update `soft_bookrack` set book_author=? where book_isbn=?;");
+            //赋值参数
+            statement.setString(1, "张卫滨");
+            statement.setString(2, "9787115417305");
+            //执行语句
+            int effect = statement.executeUpdate();
+            System.out.println("Execute Result " + effect);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * 查询一本书
+     */
+    public void queryBook() {
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        Book book = null;
+        List<Book> bookList = new ArrayList<>();
+        try {
+            //创建连接
+            connection = dataSource.getConnection();
+            //创建命令
+            statement = connection.prepareStatement
+                    ("select book_name, book_author, book_isbn from soft_bookrack where book_isbn = ?;");
+            //赋值参数
+            statement.setString(1, "9787115417305");
+            //执行语句-返回结果集
+            resultSet = statement.executeQuery();
+            //讲结果集添加到List中去，打印结果集
+            while (resultSet.next()) {
+                book = new Book();
+                book.setName(resultSet.getString("book_name"));
+                book.setAuthor(resultSet.getString("book_author"));
+                book.setIsbn(resultSet.getString("book_isbn"));
+                bookList.add(book);
+            }
+            System.out.println(bookList);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally { //释放资源
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+
+@Data
+public class Book {
+    private String name;
+    private String author;
+    private String isbn;
+}
 
 ```
 
+上面冗长的代码，甚至非常复杂。其中只有20%的代码真正用于业务功能，其余80%的代码都是样板代码。不过， 这些样板代码非常重要，清理资源和处理错误确保了数据访问的健壮性，避免了资源的泄露。
+基于上面的原因，我们才需要框架来确保这些样板代码只写一次而且是正确的。 
+
+### 3.2使用JDBC模板
+
+为了简化JDBC代码。Spring的JDBC框架承担了**资源管理和异常处理**的工作，从而简化了JDBC代码，让我们只需要编写从数据库读写数据的必须的代码。
+
+下面我们把JDBC代码改造成为使用JdbcTemplate访问数据。
+
+配置JdbcTemplate的Bean:
+
+```java
+@Component
+@Data
+public class JdbcTemplateOperation {
+
+    @Autowired
+    private final JdbcTemplate jdbcTemplate;
+
+    public JdbcTemplateOperation(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    /**
+     * 添加一本书
+     */
+    public void addBook() {
+        int effect = this.jdbcTemplate.update(
+                "insert into `soft_bookrack` (book_name, book_author, book_isbn) values (?, ?, ?)"
+                , "Spring in Action",
+                "Craig Walls",
+                "9787115417306"
+        );
+        System.out.println("Add book result" + effect);
+
+    }
+
+    public void deleteBook() {
+        int effect = this.jdbcTemplate.update(
+                "delete from soft_bookrack where book_isbn=?",
+                "9787115417306"
+        );
+        System.out.println("Delete book result" + effect);
+    }
+
+
+    /**
+     * 更新一本书
+     */
+    public void updateBook() {
+        int effect = this.jdbcTemplate.update("update `soft_bookrack` set book_author=? where book_isbn=?",
+                "张卫滨",
+                "9787115417306"
+        );
+        System.out.println("Update book result" + effect);
+    }
+
+    /**
+     * 查询一本书
+     * 封装成一个Map集合
+     */
+    public void queryBook() {
+        //结果集封装一个Map
+        List<Map<String, Object>> bookList = this.jdbcTemplate.queryForList(
+                "select book_name, book_author, book_isbn from soft_bookrack where book_isbn = ?;",
+                "9787115417306"
+        );
+        System.out.println(bookList);
+    }
+
+
+    /**
+     * 查询一本书
+     * 封装成一个BookList列表
+     */
+    public void queryBookForList() {
+        List<Book> bookList = this.jdbcTemplate.query(
+                "select book_name, book_author, book_isbn from soft_bookrack;",
+                new Object[]{}, new RowMapper<Book>() {
+                    @Override
+                    public Book mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+                        Book book = new Book();
+                        book.setName(resultSet.getString("book_name"));
+                        book.setAuthor(resultSet.getString("book_author"));
+                        book.setIsbn(resultSet.getString("book_isbn"));
+                        return book;
+                    }
+                }
+        );
+        System.out.println(bookList);
+    }
+
+
+    /**
+     * 查询数据个数  --int
+     *
+     * @return int
+     */
+    public int countBook() {
+        int count = this.jdbcTemplate.queryForObject("select count(book_isbn)from soft_bookrack",
+                Integer.class);
+        System.out.println("count book =  " + count);
+        return count;
+    }
+
+    /**
+     * 根据isbn查询书籍
+     * 错误用法，queryForObject返回值是单行单列的
+     *
+     * @return 返回查找到的书对象
+     */
+    public List<Map<String, Object>> queryBookByIsbn() {
+        List<Map<String, Object>> bookList = this.jdbcTemplate.queryForList("select book_name,book_author,book_isbn from soft_bookrack where book_isbn=?",
+                "9787115417305");
+        System.out.println("queryBookByIsbn book =  " + bookList);
+        return bookList;
+    }
+}
+
+
+
+
+```
+
+看到改造之后的代码，第一感觉就是简洁，**代码都是围绕业务编写的**。但是需要明确一点是，虽然看不到样板代码了，但不代表其不存在，这样样板代码只是巧妙地隐藏到**JDBC模板类**中了
