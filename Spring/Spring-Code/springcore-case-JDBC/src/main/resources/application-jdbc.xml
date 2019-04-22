@@ -2,11 +2,15 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/context
-       http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
 
     <!--获取数据源-->
@@ -49,9 +53,66 @@
         <property name="password" value="${jdbc.password}"/>
     </bean>
 
-
     <!--使用Spring JDBC JdbcTemplate-->
     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <property name="dataSource" ref="dataSource"/>
     </bean>
+
+
+    <!--配置事务管理器
+        1.配置数据源
+        2.配置基于数据源的事务管理器
+        3.配置引用数据源
+    -->
+
+    <!--配置事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+
+    <!--事务模板类-->
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+        <!--设置隔离级别-->
+        <property name="isolationLevelName" value="ISOLATION_REPEATABLE_READ"/>
+    </bean>
+
+    <!--声明式事务管理
+    0.开启注解扫描，自动注入
+    0.数据源配置
+    1.配置事务管理器
+    2.声明式事务配置  -/>  事务增强
+    3.使用切点表达式定义目标方法
+    -->
+    <!--2.声明式事务配置 事务增强-->
+    <tx:advice id="txManager" transaction-manager="transactionManager">
+
+        <tx:attributes>
+            <!-- 2.1 事务属性定义 -->
+            <tx:method name="query*" read-only="true"/>
+            <tx:method name="add*" rollback-for="Exception"/>
+            <tx:method name="delete*" rollback-for="Exception"/>
+            <tx:method name="update*" rollback-for="Exception"/>
+            <tx:method name="*" rollback-for="Exception"/>
+        </tx:attributes>
+
+    </tx:advice>
+
+    <!--事务控制的方法在业务层中体现-->
+    <!-- 3. 使用强大的切点表达式轻松定义目标方法 -->
+    <aop:config>
+
+        <!--3.1 通过AOP定义事务的增强切面   .*包 .*任意类 .*任意方法（..任意参数）-->
+        <aop:pointcut id="medthosTx" expression="execution(* com.github.soyanga.SpringJDBC.Service.*.*.*(..))"/>
+        <!--3.2引用事务增强-->
+        <aop:advisor advice-ref="txManager" pointcut-ref="medthosTx"/>
+
+    </aop:config>
+
+
+    <!--注解配置事务-->
+    <!--启用事务注解驱动-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
 </beans>
