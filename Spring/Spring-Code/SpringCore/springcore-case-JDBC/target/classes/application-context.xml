@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!--开启组件扫描 通过注解方式声明Bean和自动装配-->
+    <context:component-scan base-package="com.github.soyanga.SpringJDBC"/>
+
+    <!--添加配置 属性文件信息-->
+    <context:property-placeholder file-encoding="UTF-8" location="classpath:application.properties"/>
+
+    <!--切割文件，关于数据库的xm配置，单独分开，业务层，控制层也切分，构成分层结构-->
+    <import resource="application-controller.xml"/>
+    <import resource="application-biz.xml"/>
+    <import resource="application-jdbc.xml"/>
+
+</beans>
