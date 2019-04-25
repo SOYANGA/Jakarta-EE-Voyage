@@ -100,33 +100,36 @@ SpringMVC的请求响应步骤如下:
 10. (**渲染**)前端控制器进行视图渲染（视图渲染将模型数据(在ModelAndView对象中)填充到request域）
 11. (**响应**)前端控制器向用户响应结果
 
-## 3.快速开启SpringMVC项目**
+## 3.快速开启SpringMVC项目
 
-3.1前期准备
+### 3.1前期准备
 
 tomcat8，IDEA
 
-3.2创建Maven项目
+### 3.2创建Maven项目
 
 - 创建Maven项目
 - **创建WEB项目中需要的目录**
 
-```
-E:.   
-	├─src    
-	│  └─main    
-	│      ├─java    
-	│      │  └─com    
-	│      │      └─bittech    
-	│      │          └─springmvc   
-    │      │              ├─control  //web层    
-    │      │              └─service  //业务层    
-    │      │                  └─impl    
-    │      ├─resources    
-    │      └─webapp    
-    │          └─WEB-INF
-
-```
+<details>
+<summary>展开查看</summary>
+<pre><code>.   
+├─src    
+│  └─main    
+│      ├─java    
+│      │  └─com    
+│      │      └─bittech    
+│      │          └─springmvc
+|	   |		  	  |-dao     //（持久化）数据库层
+|	   |		  	  |-entity	//实体类
+│      │              ├─control  //web层    
+│      │              └─service  //业务层    
+│      │                  └─impl    
+│      ├─resources    
+│      └─webapp    
+│          └─WEB-INF
+</code></pre>
+</details>
 
 - pom.xml中添加SpringMVC依赖
 
@@ -138,25 +141,122 @@ E:.
 
 `web.xml`文件位于：`src/main/webapp/WEB-INF/web.xml`,该文件可以从Tomcat的目录`apache-tomcat-8.5.30\conf\web.xml`中获取。
 
-```
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1" metadata-complete="true">
+    <description>This is Java Spring MVC Application</description>
 
+
+    <!--设置根上下文参数配置  与Spring Core容器相关-->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:application-context.xml</param-value>
+    </context-param>
+    <!--注册ContextLoaderListener-->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!--前端控制器，注册DispatcherServlet-->
+    <servlet>
+        <servlet-name>servlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:application-servlet.xml</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>servlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+	<!--设置欢迎页面-->
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+</web-app>
 ```
 
 ### 3.4配置SpringMVC容器
 
+
+
 #### 3.4.1配置视图
 
+```xml
+<!--配置视图解析器-->
+<!--/abc  ==>  /WEB_INF/views/abc.jsp-->
+<!--/index  ==>  /WEB_INF/views/index.jsp-->
+<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    <property name="prefix" value="/WEB-INF/views/"/>
+    <property name="suffix" value=".jsp"/>
+</bean>
 ```
 
+#### 3.4.2配置自动注入
+
+```xml
+<!--配置自动注入-->
+<!--扫描包 control-->
+<context:component-scan base-package="com.github.soyanga.springmvc.control"/>
+<!-- 启动springMVC的注解功能，它会自动注册HandlerMapping,HandlerAdapter,ExceptionResolver的相关实例 -->
+<mvc:annotation-driven/>
 ```
 
-3.4.2配置自动注入
+### 3.4.3容器继承关系
+
+`ApplicationContext`实例是在Spring的作用域中，而Web MVC框架中每个`DispatcherServlet`有自己的`WebApplicationContext`,其继承所有已经在`Root WebApplicationContext`中定义的Bean。
+
+![1556181862029](D:\婕\JavaEE学习之路\Spring\picture\容器继承关系.png)
+
+### 3.5编写Controller
+
+```java
+@Controller
+@RequestMapping
+public class HelloWorldController {
+
+    @RequestMapping(value = {"", "/index"}, method = {RequestMethod.GET})
+    public ModelAndView hello() {
+        ModelAndView modelAndView = new ModelAndView();
+
+        modelAndView.addObject("greetting_message",
+                "Welcome to at" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+       
+        modelAndView.setViewName("index");  //WEB_INF/Views/index.jsp
+        return modelAndView;
+    }
+}
+```
+
+### 3.6编写简单的View
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Spring MVC</title>
+</head>
+<body>
+<%--<h1>当前时间${greetting_message}</h1>--%>
+<%--<a href="index.html">HelloWeb</a>--%>
+</body>
+</html>
 
 ```
 
-```
+### 3.7配置Tomcat部署服务
 
-3.4.3容器继承关系
+- 运行Tomcat
+- 成功后访问:`http://ip:port/index`地址（设置欢迎页地址后就不用去访问，自动就去访问这个设置的欢迎页地址）
 
+### 3.8SpringMVC涉及的元素
 
+上面展示的了从创建一个SpringMVC项目涉及的各个方面的内容，归纳为如下图所示:
 
+![1556182140466](D:\婕\JavaEE学习之路\Spring\picture\SpringMVC涉及的元素.png)
