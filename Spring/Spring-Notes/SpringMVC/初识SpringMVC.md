@@ -112,29 +112,35 @@ tomcat8，IDEA
 - **创建WEB项目中需要的目录**
 
 <details>
-<summary>展开查看</summary>
-<pre><code>.   
-├─src    
-│  └─main    
-│      ├─java    
-│      │  └─com    
-│      │      └─bittech    
+    <summary>展开查看</summary>
+    <pre><code>
+.
+├─src
+│  └─main
+│      ├─java
+│      │  └─com
+│      │      └─bittech
 │      │          └─springmvc
-|	   |		  	  |-dao     //（持久化）数据库层
-|	   |		  	  |-entity	//实体类
-│      │              ├─control  //web层    
-│      │              └─service  //业务层    
-│      │                  └─impl    
-│      ├─resources    
-│      └─webapp    
+│      │              ├─entity	//实体类
+│      │              ├─dao     //（持久化）数据库层
+│      │              ├─control  //web层
+│      │              └─service  //业务层
+│      │                  └─impl
+│      ├─resources
+│      └─webapp
 │          └─WEB-INF
-</code></pre>
+    </code></pre>
 </details>
+
 
 - pom.xml中添加SpringMVC依赖
 
-```
-
+```xml
+ <!--SpringMVC模块依赖添加-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
 ```
 
 ### 3.3配置web.xml
@@ -182,9 +188,9 @@ tomcat8，IDEA
 </web-app>
 ```
 
-### 3.4配置SpringMVC容器
+### 3.4配置SpringMVC容器 
 
-
+**application-servlet.xml中配置** 
 
 #### 3.4.1配置视图
 
@@ -236,6 +242,8 @@ public class HelloWorldController {
 
 ### 3.6编写简单的View
 
+ :file_cabinet: index.jsp
+
 ```jsp
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
@@ -243,11 +251,9 @@ public class HelloWorldController {
     <title>Spring MVC</title>
 </head>
 <body>
-<%--<h1>当前时间${greetting_message}</h1>--%>
-<%--<a href="index.html">HelloWeb</a>--%>
+<h1>当前时间${greetting_message}</h1>
 </body>
 </html>
-
 ```
 
 ### 3.7配置Tomcat部署服务
