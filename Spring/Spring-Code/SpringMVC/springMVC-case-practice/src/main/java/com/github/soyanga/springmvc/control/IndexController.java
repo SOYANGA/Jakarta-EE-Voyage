@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping
 public class IndexController {
 
-    @RequestMapping(value = {"","/index"}, method = {RequestMethod.GET})
+    @RequestMapping(value = {"", "/index"}, method = {RequestMethod.GET})
     public ModelAndView hello() {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("welcome");  //WEB_INF/Views/welcome.jsp

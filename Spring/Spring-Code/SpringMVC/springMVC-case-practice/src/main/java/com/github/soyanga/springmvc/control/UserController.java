@@ -22,9 +22,9 @@ public class UserController {
 
     private static final String CURRENT_USER = "current_user";
 
-    //@RequestMapping(value = "/login", method = {RequestMethod.POST})
+    @RequestMapping(value = "/login", method = {RequestMethod.POST})
     //组合注解等价上面的注解
-    @PostMapping(value = "/login",headers = {"Cache-Control"})
+    //@PostMapping(value = "/login", headers = {"Cache-Control"})
     //hraders：请求里面必须要有这个"Cache-Control"这个请求头
     //localhost:8080/user/login
     //引入@RequestParam注解，我们更为严格的控制请求，
