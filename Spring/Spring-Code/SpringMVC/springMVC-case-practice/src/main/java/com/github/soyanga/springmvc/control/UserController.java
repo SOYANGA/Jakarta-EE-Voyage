@@ -1,10 +1,13 @@
 package com.github.soyanga.springmvc.control;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -35,23 +38,35 @@ public class UserController {
             @RequestParam(value = "username") String username,
             @RequestParam(value = "password") String password,
             @RequestParam(value = "remind", required = false, defaultValue = "0") String[] remind,
-            HttpServletRequest request) {
+            HttpSession session,
+            HttpServletResponse response) {
         System.out.println("login username=" + username + ", password=" + password);
 
         //String[] remind = request.getParameterValues("remind");
         System.out.println(Arrays.toString(remind));
-
-        HttpSession session = request.getSession();
-        session.setAttribute(CURRENT_USER, username);
-
         ModelAndView modelAndView = new ModelAndView();
-        try {
-            modelAndView.addObject("username", new String(username.getBytes("ISO-8859-1"), "UTF-8"));
-            modelAndView.addObject("password", new String(password.getBytes("ISO-8859-1"), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        //如果用户未输入用户名或者密码则用户需要重新登陆
+        if (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password)) {
+            session.setAttribute(CURRENT_USER, username);
+
+            //记住密码则将用户名放入Cookie中，响应给浏览器，浏览器进行存储，让登陆过的用户下次进入直接到登陆页面，不会走登陆请求了
+            if ("1".equals(remind[0])) {
+                Cookie cookie = new Cookie("remind", username);
+                //设置cookie持久化时间为半小时
+                cookie.setMaxAge(3600);
+                response.addCookie(cookie);
+            }
+            try {
+                modelAndView.addObject("username", new String(username.getBytes("ISO-8859-1"), "UTF-8"));
+                modelAndView.addObject("password", new String(password.getBytes("ISO-8859-1"), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            modelAndView.setViewName("home");  //WEB_INF/Views/home.jsp
+            return modelAndView;
+        } else {
+            modelAndView.setViewName("login");
         }
-        modelAndView.setViewName("home");  //WEB_INF/Views/home.jsp
         return modelAndView;
     }
 
@@ -59,11 +74,17 @@ public class UserController {
     //组合注解等价上面的注解
     @GetMapping(value = "/login")
     // localhost:8080/user/login
-    public ModelAndView loginGet() {
+    public ModelAndView loginGet(@CookieValue(value = "remind", required = false, defaultValue = "") String username) {
         ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("login");  //WEB_INF/Views/index.jsp
+        if (StringUtils.isEmpty(username)) {
+            modelAndView.setViewName("login");  //WEB_INF/Views/index.jsp
+        } else {
+            modelAndView.addObject("username", username);
+            modelAndView.setViewName("home");
+        }
         return modelAndView;
     }
+
 
     //@RequestMapping(value = "/logout", method = {RequestMethod.GET})
     //组合注解等价上面的注解
