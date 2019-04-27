@@ -14,7 +14,7 @@
 <%--<h1>当前时间${greetting_message}</h1>--%>
 <%--<a href="index.html">HelloWeb</a>--%>
 
-<form action="/user/login" method="post">
+<form action="/user/login" method="post" >
     <label for="username">用户名：</label> <input id="username" type='text' name="username" value=""
                                               placeholder="请输入用户名">
     <br>
