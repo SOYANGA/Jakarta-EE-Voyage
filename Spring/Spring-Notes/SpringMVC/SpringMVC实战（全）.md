@@ -1161,9 +1161,145 @@ public class AppExecptionHandlerController {
 
 ### 3.4拦截器
 
+在我们JavaWen中有Filter过滤器，SpringMVC中为我们提供了拦截器，当收到请求时，DispatcherServlet请求交给处理器映射(HandlerMapping),让我们找出对应请求HandlerExecutionChain对象。
+
+HandlerExecutionChain顾名思义是**一个执行链**，**它包含一个处理该请求的处理器（Handler），同时包含若干个对该请求实施拦截的拦截器（HandlerInterceptor）**。当HandlerMapping返回HandlerExecutionChain后， DispatcherServlet将请求交给定义在HandlerExecutionChain中的拦截器和处理器一并处理。如下图第三步骤
+
+![1556038080847](D:\婕\JavaEE学习之路\Spring\picture\SpringMVC核心类的请求流程.png)
+
+
+
+![1556457099846](D:\婕\JavaEE学习之路\Spring\picture\SpringMVC拦截器.png)
+
+HandlerExecutionChain是负责处理请求并返回ModelAndView的处理执行链，**请求在被Handler执行的前后链中装配的HandlerInterceptor会实施拦截操作。** 
+
+*如下:自定义一个拦截器，设置响应编码为UTF-8*
+
+```java
+package com.github.soyanga.springmvc.interceptor;
+
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * @program: springMVC-case-practice
+ * @Description: 自定义一个拦截器，设置响应编码为UTF-8
+ * @Author: SOYANGA
+ * @Create: 2019-04-28 21:21
+ * @Version 1.0
+ */
+public class HttpEncodinginterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object o) throws Exception {
+
+        response.setCharacterEncoding("UTF-8");
+        System.out.println("HttpEncodinginterceptor preHandle");
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object o, ModelAndView modelAndView) throws Exception {
+
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object o, Exception e) throws Exception {
+
+    }
+}
+
+```
+
+每个拦截器可以配置一个拦截路径，可以配置多个拦截器。
+
+**在application-servlet中配置拦截器**
+
+```xml
+    <!--3.4配置自定义拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+        <!--拦截所有地址-->
+        <mvc:mapping path="/**"/>
+        <!--引入拦截器的Bean-->
+        <bean class="com.github.soyanga.springmvc.interceptor.HttpEncodinginterceptor"/>
+        </mvc:interceptor>
+
+        <mvc:interceptor>
+            <!--拦截所有地址-->
+            <mvc:mapping path="/**"/>
+            <!--排除登陆和退出,主页，注册,静态图片-->
+            <!--<mvc:exclude-mapping path="/"/>无法排除拦截/ -->
+            <mvc:exclude-mapping path="/user/login"/>
+            <mvc:exclude-mapping path="/assets/**"/>
+            <mvc:exclude-mapping path="/user/logout"/>
+            <mvc:exclude-mapping path="/index"/>
+            <!--引入拦截器的Bean-->
+            <bean class="com.github.soyanga.springmvc.interceptor.AuthInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+```
+
+
+
+自定义一个拦截器，可以检测用户是否登陆，限制未登录用户的使用权限 拦截器配置如上
+
+```java
+package com.github.soyanga.springmvc.interceptor;
+
+import com.github.soyanga.springmvc.control.UserController;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ * @program: springMVC-case-practice
+ * @Description: 自定义一个拦截器，检测是否登陆，限制未登录者的访问权限 HandlerInterceptorAdapter空实现了HandlerInterceptor接口 我们就可以选择需要的方法去编写
+ * @Author: SOYANGA
+ * @Create: 2019-04-28 21:30
+ * @Version 1.0
+ */
+public class AuthInterceptor extends HandlerInterceptorAdapter {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object o) throws Exception {
+        //可以通过自己的方式去拦截
+        String uri = request.getRequestURI();
+        if ("".equals(uri) || "/".equals(uri)) {
+            System.out.println("当前访问的是欢迎页");
+            return true;
+        }
+        HttpSession session = request.getSession();
+        Object user = session.getAttribute(UserController.CURRENT_USER);
+        System.out.println(user);
+        if (user == null) {
+            System.out.println("AuthInterceptor false");
+            return false;
+        } else {
+            System.out.println("AuthInterceptor true");
+            return true;
+        }
+    }
+}
+
+```
+
 
 
 ## 总结
+
+| 知识块        | 知识点                                     |
+| ------------- | ------------------------------------------ |
+| SpringMVC注解 | 1.控制器2.请求映射3.控制器方法             |
+| SpringMVC特性 | 1.上传文件2.异常处理3.静态资源处理4.拦截器 |
 
 
 
