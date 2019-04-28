@@ -30,4 +30,49 @@
     <!-- 启动springMVC的注解功能，它会自动注册HandlerMapping,HandlerAdapter,ExceptionResolver的相关实例 -->
     <mvc:annotation-driven/>
 
+    <!--1.1第一种方式配置 Mutipart解析器 文件上传-->
+    <!--<bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>-->
+
+
+    <!--2.1第二种方式配置- Mutipart解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="10240000"/>
+        <property name="defaultEncoding" value="utf-8"/>
+        <property name="maxInMemorySize" value="4096"/>
+    </bean>
+
+    <!--3.3.1采用默认Servlet处理静态资源 由Web容器处理-->
+    <!--<mvc:default-servlet-handler default-servlet-name="default"/>-->
+
+
+    <!--3.3.2采用Spring的Resources  处理静态资源-->
+    <!--请求映射的前缀为                mapping = /assets的URL为静态资源的访问
+        可以是多个路径，用逗号隔开       location = /assets/ 的地址下去找：/为Web存放的目录
+                                        cache-period = 缓存周期10分钟 单位秒  -->
+    <mvc:resources mapping="/assets/**" location="/assets/" cache-period="600"/>
+
+
+    <!--3.4配置自定义拦截器-->
+    <mvc:interceptors>
+        <!--<mvc:interceptor>-->
+        <!--&lt;!&ndash;拦截所有地址&ndash;&gt;-->
+        <!--<mvc:mapping path="/**"/>-->
+        <!--&lt;!&ndash;引入拦截器的Bean&ndash;&gt;-->
+        <!--<bean class="com.github.soyanga.springmvc.interceptor.HttpEncodinginterceptor"/>-->
+        <!--</mvc:interceptor>-->
+
+        <mvc:interceptor>
+            <!--拦截所有地址-->
+            <mvc:mapping path="/**"/>
+            <!--排除登陆和退出,主页，注册,静态图片-->
+            <!--<mvc:exclude-mapping path="/"/>无法排除拦截/ -->
+            <mvc:exclude-mapping path="/user/login"/>
+            <mvc:exclude-mapping path="/assets/**"/>
+            <mvc:exclude-mapping path="/user/logout"/>
+            <mvc:exclude-mapping path="/index"/>
+            <!--引入拦截器的Bean-->
+            <bean class="com.github.soyanga.springmvc.interceptor.AuthInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
 </beans>

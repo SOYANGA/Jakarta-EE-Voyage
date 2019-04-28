@@ -14,16 +14,16 @@
 <%--<h1>当前时间${greetting_message}</h1>--%>
 <%--<a href="index.html">HelloWeb</a>--%>
 
-<form action="/user/login" method="post" >
-    <label for="username">用户名：</label> <input id="username" type='text' name="username" value=""
-                                              placeholder="请输入用户名">
-    <br>
-    <label for="password">密&nbsp&nbsp&nbsp码：</label> <input id="password" type='text' name="password" value=""
-                                                            placeholder="请输入密码">
-    <br>
+<%--<form action="/user/login" method="post" >--%>
+<%--<label for="username">用户名：</label> <input id="username" type='text' name="username" value=""--%>
+<%--placeholder="请输入用户名">--%>
+<%--<br>--%>
+<%--<label for="password">密&nbsp&nbsp&nbsp码：</label> <input id="password" type='text' name="password" value=""--%>
+<%--placeholder="请输入密码">--%>
+<%--<br>--%>
 
-    <input type="submit" value="登陆">
-</form>
+<%--<input type="submit" value="登陆">--%>
+<%--</form>--%>
 
 </body>
 </html>

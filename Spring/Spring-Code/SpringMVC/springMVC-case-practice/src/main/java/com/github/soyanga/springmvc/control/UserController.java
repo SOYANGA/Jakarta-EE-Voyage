@@ -3,14 +3,17 @@ package com.github.soyanga.springmvc.control;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * @program: springMVC-case-practice
@@ -23,7 +26,7 @@ import java.util.Arrays;
 @RequestMapping(value = "/user")
 public class UserController {
 
-    private static final String CURRENT_USER = "current_user";
+    public static final String CURRENT_USER = "current_user";
 
     @RequestMapping(value = "/login", method = {RequestMethod.POST})
     //组合注解等价上面的注解
@@ -41,7 +44,6 @@ public class UserController {
             HttpSession session,
             HttpServletResponse response) {
         System.out.println("login username=" + username + ", password=" + password);
-
         //String[] remind = request.getParameterValues("remind");
         System.out.println(Arrays.toString(remind));
         ModelAndView modelAndView = new ModelAndView();
@@ -89,14 +91,58 @@ public class UserController {
     //@RequestMapping(value = "/logout", method = {RequestMethod.GET})
     //组合注解等价上面的注解
     @GetMapping(value = "/logout")
-    public ModelAndView logout(HttpServletRequest request) {
+    public ModelAndView logout(HttpServletRequest request, HttpServletResponse response) {
 
         HttpSession session = request.getSession();
+        //打印sessio域中的用户名称
+        System.out.println(session.getAttribute(CURRENT_USER));
+        //当用户记住密码但是退出的时候，就需要将记住的密码Cookie重置，当用户不点击退出，则用户就一在30分钟内不用重新登陆
         session.removeAttribute(CURRENT_USER);
+        Cookie cookie = new Cookie("remind", "");
+        response.addCookie(cookie);
+        //销毁session
+        //session.invalidate();
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("welcome");  //WEB_INF/Views/welcome.jsp
         return modelAndView;
     }
 
+
+    /**
+     * 转到上传请求页面
+     *
+     * @return
+     */
+    @RequestMapping(value = "/upload", method = {RequestMethod.GET})
+    public String upload() {
+        return "upload";
+    }
+
+
+    /**
+     * 将表单提交的数据("head")存储在内存中何使用 Multipart解析器对 请求数据进行解析并存储
+     * 然后将数据进行Base65编码生成字符串
+     * 然后将字符串拼接上data:image/%s;base64,%s 数据类型 + base64文件编码 生成Base64编码的完整格式。
+     * 最后响应给请求页面
+     *
+     * @param multipartFile
+     * @return
+     */
+    @RequestMapping(value = "/upload", method = {RequestMethod.POST})
+    public ModelAndView upload(@RequestPart(value = "head") MultipartFile multipartFile) {
+        ModelAndView modelAndView = new ModelAndView();
+        try {
+            byte[] data = multipartFile.getBytes();
+            String dataStr = Base64.getEncoder().encodeToString(data);
+            //data:image/png;base64,{}
+            String extend = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf(".") + 1);
+            String base64Value = String.format("data:image/%s;base64,%s", extend, dataStr);
+            modelAndView.addObject("head_data", base64Value);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        modelAndView.setViewName("upload");
+        return modelAndView;
+    }
 }

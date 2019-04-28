@@ -14,6 +14,7 @@
 
 <h1>网站主页</h1>
 <h2><a href="/user/login">登录</a></h2>
+<img src="/assets/image/spring3.png"/>
 
 </body>
 </html>
