@@ -2,6 +2,7 @@ package com.github.soyanga.springBootBasic.control;
 
 import com.github.soyanga.springBootBasic.component.ExampleBean;
 import com.github.soyanga.springBootBasic.config.AppConfig;
+import com.github.soyanga.springBootBasic.config.BookProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +35,10 @@ public class indexController {
     @Autowired
     private Environment environment;
 
+    //自动注入bookProperties属性配置
+    @Autowired
+    private BookProperties bookProperties;
+
 
     @RequestMapping(value = "/appconfig", method = {RequestMethod.GET})
     public String appconfig() {
@@ -54,5 +59,15 @@ public class indexController {
         return map;
     }
 
+
+    /**
+     * 获取book属性 从中获取配置中获取
+     *
+     * @return
+     */
+    @RequestMapping(value = "/book", method = {RequestMethod.GET})
+    public BookProperties bookProperties() {
+        return bookProperties;
+    }
 
 }
