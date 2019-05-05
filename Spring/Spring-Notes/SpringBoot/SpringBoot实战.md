@@ -378,17 +378,9 @@ Spring Boot提供很多有用的测试应用的工具。`spring-boot-starter-tes
 
 一个Spring Boot应用只是一个`Spring ApplicationContext`，所以在测试它时除了正常情况下处理一个 `vanilla Spring context `外不需要做其他特别事情。唯一需要注意的是，如果你使用SpringApplication创建上下文，外部配置，日志和Spring Boot的其他特性只会在默认的上下文中起作用。
 
- Spring Boot提供一个``@SpringBootTest`注解用来替换标准的`spring-test  @ContextConﬁguration`注解。如果使用 @SpringBootTest来设置你的测试中使用的ApplicationContext，它终将通过SpringApplication创建，并且你将获取到Spring Boot的其他特性。
+ Spring Boot提供一个`@SpringBootTest`注解用来替换标准的`spring-test  @ContextConﬁguration`注解。如果使用 @SpringBootTest来设置你的测试中使用的ApplicationContext，它终将通过SpringApplication创建，并且你将获取到Spring Boot的其他特性。
 
 ```java
-import com.github.soyanga.springBootBasic.component.ExampleBean;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
 /**
  * @program: springBoot-action
  * @Description: SpringBoot 测试
@@ -462,7 +454,6 @@ public class SpringBootActionWebTest {
 - **RANDOM_PORT**: 加载ServletWebServerApplicationContext和提供真实的Servlet环境，嵌入式Servlet容器 启动和监听随机端口 
 - **DEFINED_PORT**: 加载ServletWebServerApplicationContext和提供真实的Servlet环境，嵌入式Servlet容器 启动和监听端口号来自application.properties定义或者使用默认端口8080 
 - **NONE**: 通过使用SpringApplication加载ApplicationContext，但是不提供任何的Servlet环境
-  注意：Spring测试框架在每次测试时会缓存应用上下文。因此，只要测试共享相同的配置，不管实际运行多 少测试，开启和停止服务器只会发生一次。 
 
 > ==**注意**==：**Spring测试框架在每次测试时会缓存应用上下文。因此，只要测试共享相同的配置，不管实际运行多少测试，开启和停止服务器只会发生一次。**
 
@@ -551,8 +542,22 @@ spring-boot-maven-plugin插件包含了如下几个goal(目标):
 
 - 修改启动类
 
-  ```
+  ```java
+  @SpringBootApplication()
   
+  @ImportResource(locations = {"classpath:application-bean.xml"})
+  public class SpringBootActionApplication extends SpringBootServletInitializer {
+  
+      //Tomcat中会调用该方法启动
+      @Override
+      protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+          return builder.sources(SpringBootActionApplication.class);
+      }
+  
+      public static void main(String[] args) {
+          SpringApplication.run(SpringBootActionApplication.class, args);
+      }
+  }
   ```
 
   > 注意：如果WEB容器不是tomcat,那么需要修改的是对应的容器依赖starter(可能是：spring-boot-starterjetty，spring-boot-starter-undertow) 
@@ -577,7 +582,7 @@ SpringBoot包含很多其他特性，它们可以帮助我们监控和管理发�
 ```xml
         <!--Spring 执行器依赖 Actuator-->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
+           <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 ```
@@ -604,7 +609,7 @@ spring-boot-actuator提供的如下可用端点：
 | shutdown    | 允许应用以优雅的方式关闭(默认情况下不允许)                   | true              |
 | trace       | 显示trace信息(默认为最新的一些HTTP请求)                      | true              |
 
-> 注：根据一个端点暴露的方式，sensitive参数可能会被用作一个安全提示。例如，在使用HTTP访问sensitive端点时需要提供用户名/密码(如果没有启用web安全，可能会简化为禁止访问该端点)。
+> 注：根据一个端点暴露的方式，**sensitive参数可能会被用作一个安全提示**。例如，在使用HTTP访问sensitive端点时需要提供用户名/密码(如果没有启用web安全，可能会简化为禁止访问该端点)。
 
 启用Web端点
 
@@ -613,7 +618,6 @@ spring-boot-actuator提供的如下可用端点：
 management.endpoints.web.exposure.include=* 
 #排除beans的端点 
 management.endpoints.web.exposure.exclude=beans
-
 ```
 
 #### 3.2.1自定义端点
@@ -711,12 +715,10 @@ public class RandomHealth implements HealthIndicator {
 management.health.status.order=FATAL, DOWN, OUT_OF_SERVICE, UNKNOWN, UP
 ```
 
-
-
 ## 总结
 
-|      |      |
-| ---- | ---- |
-|      |      |
-|      |      |
-
+| 知识块         | 知识点                                       |
+| -------------- | -------------------------------------------- |
+| SpringBoot实战 | 1.SQL数据库2.Redis数据库3.邮件发送4.集成测试 |
+| 事务管理       | 1.配置pom.xml 2.打包部署                     |
+| 产品特性       | 1.端点以及配置2.健康检查                     |
