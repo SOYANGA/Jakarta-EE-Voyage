@@ -53,3 +53,14 @@ SpringMVC
 			 采用Spring的Resources
 		拦截器
 			 自定义拦截器
+	SpringMVC 构建REST服务
+		REST简介
+			REST优点
+			REST架构的主要原则-一切结资源
+		Spring如何支持REST
+			支持方式
+			资源转换
+			内容协商
+			消息转换器
+		REST客户端
+			RestTemplate的操作
