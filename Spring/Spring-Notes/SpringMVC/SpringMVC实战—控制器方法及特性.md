@@ -99,7 +99,7 @@ SpringMVC框架会按照请求参数名和POJO属性名进行自动匹配，自�
      * 2.1.3POJO类作为参数
      * http://localhost:8080/controller/pojo?id=1&name=SOYANGA&address.name=XIAN&address.code=7100
      * 将URL中的参数进行抽象及封装成一个POJO类返回对应
-     * ControllerMethodController.User(id=1, name=SOYANGA, address=ControllerMethodController.Address(name=XIAN, code=7100))
+     * ControllerMethodController.User(id=1,name=SOYANGA,address=ControllerMethodController.Address(name=XIAN, code=7100))
      *
      * @param user
      * @return
@@ -179,7 +179,7 @@ SpringMVC在内部使一个`org.springframework.ui.Model`接口存储模型数�
      * 访问控制器中的任何一个请求处理方法栈，SpringMVC会先执行该方法
      * 并将返回值以user为键添加到模型中   即讲user作为模型初始化且暂存起来
      */
-    //内部隐藏一个model<String,Object> 将 "user"做为key，而user对象作为value进行填充
+    //内部隐藏一个model<String,Object> 将 "user"做为key，而user对象的属性作为value进行填充
     @ModelAttribute(value = "user")
     public User getUser() {
         User user = new User();
@@ -271,7 +271,7 @@ SpringMVC在内部使一个`org.springframework.ui.Model`接口存储模型数�
 
 如图是一个上传文件的Http请求:
 
-![1556421369044](D:\婕\JavaEE学习之路\Spring\picture\Http上传文件请求报文.png)
+![1556421369044](C:\Users\32183\Desktop\Http上传文件请求报文.png)
 
 - 请求头
 
@@ -301,8 +301,57 @@ SpringMVC在内部使一个`org.springframework.ui.Model`接口存储模型数�
 一般来讲，在这两者之间` StandardServletMultipartResolver `作为优选方案。它使用Servlet提供的功能支持，**不需要依赖任何其它第三方库**。但是，如果应用部署到Servlet3.0之前的容器中，或者没有使用Spring3.1+版本，则需要选择 CommonsMultipartResolver 。
 在Servlet的WebApplicationContext的配置文件中配置如下：
 
+```xml
+ <!--1.1第一种方式配置 Mutipart解析器 文件上传-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
+
+
+    <!--2.1第二种方式配置- Mutipart解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="10240000"/>
+        <property name="defaultEncoding" value="utf-8"/>
+        <property name="maxInMemorySize" value="4096"/>
+    </bean>
 ```
 
+使用第一种方式需要在web.xml中的控制器servlet中配置multipart-config
+
+```xml
+    <!--前端控制器，注册DispatcherServlet-->
+    <servlet>
+        <servlet-name>servlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:application-servlet.xml</param-value>
+        </init-param>
+
+        <!--1.2第一种方式配置Multipart解析器
+         配置multipartconfig-->
+        <multipart-config>
+            <max-file-size>20848820</max-file-size>
+            <max-request-size>418018841</max-request-size>
+            <file-size-threshold>1048576</file-size-threshold>
+        </multipart-config>
+        
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>servlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+```
+
+使用第二种方式需要在pom.xml添加Jakarta Commons Fileupload库
+
+```xml
+        <!-- 第二种方式2.2 Spring中配置Multipart解析器
+        上传文件库 Jakarta Commons Fileupload-->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3.1</version>
+        </dependency>
 ```
 
 
@@ -407,7 +456,7 @@ Spring提供了多种方式将**异常转化为响应**：
 
 默认情况下，Spring会将自身的一些异常自动转化为**合适的状态码**，如下：
 
-![1556434649162](D:\婕\JavaEE学习之路\Spring\picture\异常映射的状态码.png)
+![1556434649162](C:\Users\32183\Desktop\异常映射的状态码.png)
 
 表中的异常一般都是由Spring自身抛出，作为DisoathcerServlet处理过程中或者执行校验是出现问题的结果。
 
@@ -518,7 +567,7 @@ Spring提供了多种方式将**异常转化为响应**：
 
 如果控制器的特定切面能够运用到**整个应用程序的所有控制器中**，那么这将会便利很多。
 
-Spring3.2引入一个新的解决方案：**控制器通知**，控制器通知(Controller Advice)是任意带有``@ControllerAdvice`注解的类，这个类可以包含一个或者多个如下类型的方法：
+Spring3.2引入一个新的解决方案：**控制器通知**，控制器通知(Controller Advice)是任意带有`@ControllerAdvice`注解的类，这个类可以包含一个或者多个如下类型的方法：
 
 - `@ExceptionHandler` 注解标注的方法 
 - `@InitBinder` 注解标注的方法 
@@ -625,7 +674,7 @@ public class AppExecptionHandlerController {
 
 ### 3.4拦截器
 
-在我们JavaWen中有Filter过滤器，SpringMVC中为我们提供了拦截器，当收到请求时，DispatcherServlet请求交给处理器映射(HandlerMapping),让我们找出对应请求HandlerExecutionChain对象。
+在我们JavaWeb中有Filter过滤器，SpringMVC中为我们提供了拦截器，当收到请求时，DispatcherServlet请求交给处理器映射(HandlerMapping),让我们找出对应请求HandlerExecutionChain对象。
 
 HandlerExecutionChain顾名思义是**一个执行链**，**它包含一个处理该请求的处理器（Handler），同时包含若干个对该请求实施拦截的拦截器（HandlerInterceptor）**。当HandlerMapping返回HandlerExecutionChain后， DispatcherServlet将请求交给定义在HandlerExecutionChain中的拦截器和处理器一并处理。如下图第三步骤
 
