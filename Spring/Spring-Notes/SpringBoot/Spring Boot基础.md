@@ -84,7 +84,7 @@ public class AppConfiguration {
 
 ```
 
-- @**propertySource**
+- @**PropertySource**
 
   如果需要自定义的属性文件需要加载，可以使用该注解进行注入，并用@Value配合使用。
 
@@ -135,7 +135,7 @@ public class SpringBootDemo1Application {
 
 - **@Bean**用@Bean标注方法等价于XML中配置的bean。
 
-```
+```java
     @Bean(initMethod = "init", destroyMethod = "destroy")
     @Scope(scopeName = "prototype") //非单例
     public ExampleBean exampleBean() {
@@ -147,7 +147,7 @@ public class SpringBootDemo1Application {
 
 - **Enviroment**
 
-`org.springframework.core.env.Environment` 环境类，Spring3.1以后开始引入。比如JDK环境，Servlet环境，Spring环境等等；每个环境都有自己的配置数据，如``System.getProperties()`、`System.getenv()``等可以拿到JDK环境数据；``ServletContext.getInitParameter()`可以拿到Servlet环境配置数据等等；**也就是说Spring抽象了一 个Environment来表示环境配置。** 
+`org.springframework.core.env.Environment` 环境类，Spring3.1以后开始引入。比如JDK环境，Servlet环境，Spring环境等等；每个环境都有自己的配置数据，如``System.getProperties()`、`System.getenv()``等可以拿到JDK环境数据；`ServletContext.getInitParameter()`可以拿到Servlet环境配置数据等等；**也就是说Spring抽象了一 个Environment来表示环境配置。** 
 在Spring Boot中使用直接用**@Resource或@Autowired**注入，即可获得系统配置文件application.properties/yml 的属性值，如果是自定义的配置文件，**则需要预先通过@PropertySource等其他注解注入后，才能获取。获取通过 getProperty()方法获取。**
 
 ```java
@@ -174,7 +174,7 @@ public class SpringBootDemo1Application {
 
 ### 2.1入口类
 
-良好的习惯，通常Spring Boot项目有一个名为***Application**的入口类，入口类里有一个main方法，该main方法其实就一个标准的java应用入口方法。在main方法中使用**SpringApplication.run(…)方法来启动Spring Boot应用项目。**
+良好的习惯，通常Spring Boot项目有一个名为**Application**的入口类，入口类里有一个main方法，该main方法其实就一个标准的java应用入口方法。在main方法中使用**SpringApplication.run(…)方法来启动Spring Boot应用项目。**
 
 ```java
 /**
@@ -201,13 +201,13 @@ Spring Boot会自动扫描@SpringBootApplication所在类的同级包(例如：c
 
 ### 2.2关闭特定的自动配置
 
-有时候需要关闭特定的自动配置，这时需要使用``@SpringBootApplication`注解的**exclude**参数
+有时候需要关闭特定的自动配置，这时需要使用`@SpringBootApplication`注解的**exclude**参数
 
 ```java
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 ```
 
-在如下图的选项中 寻找要关闭的类中的以 *Configuration结尾的类，那就是自动注入的注解
+在如下图的选项中 寻找要关闭的类中的以**Configuration**结尾的类，那就是自动注入的注解
 
 仅仅就是关闭自动装配，可以自己添加Bean，手动自动装配即可。
 
@@ -237,7 +237,7 @@ Spring Boot会自动扫描@SpringBootApplication所在类的同级包(例如：c
 - 通过[Test to ASCII Art Generator](http://patorjk.com/software/taag/) 网站生成字符，比如： `bit Tech for Java`将生成的字符复制到banner.txt文件
 - 再次启动程序，欢迎团变成如下所示
 
-```
+```java
 |  _ \(_) |   |__   __|      | |      / _|                | |                  
 | |_) |_| |_     | | ___  ___| |__   | |_ ___  _ __       | | __ ___   ____ _  
 |  _ <| | __|    | |/ _ \/ __| '_ \  |  _/ _ \| '__|  _   | |/ _` \ \ / / _` | 
@@ -400,7 +400,7 @@ application.properties
 #### 3.2.2类型安全的配置
 
 上面示例中使用@Value注入每个配置在实际项目中会显的格外麻烦，因为我们的配置通常会是许多个，若使用上 例的方式则要使用@Value注入很多次。
-Spring Boot提供了基于类型安全的配置方式，通过`@ConﬁgurationProperties`将**properties属性和一个Bean及其 属性关联，从而实现类型安全的配置。**
+Spring Boot提供了基于类型安全的配置方式，通过`@ConﬁgurationProperties`将**properties属性和一个Bean及其属性关联，从而实现类型安全的配置。**
 
 - 创建一个类型安全Bean
 

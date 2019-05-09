@@ -63,7 +63,7 @@ Spring Boot默认将应用打包成一个可执行jar包文件，构建成功后
 
 ### 4.3自动配置
 
-- Spring Boot尝试根据你添加的jar依赖自动配置你的应用。例如：如果H2在类路径中，并且你没有手动配置 任何数据库连接的bean，则Spring Boot会自动配置一个内存数据库。
+- Spring Boot尝试根据你添加的jar依赖自动配置你的应用。例如：如果H2在类路径中，并且你没有手动配置任何数据库连接的bean，则Spring Boot会自动配置一个内存数据库。
 
   ```xml
   <!--添加Springboot的jbcd依赖-->
@@ -184,13 +184,7 @@ public class PayProperties {
 ```
 
 ```properties
-#配置支付属性
-#这里在application.properties配置各个属性的值，就可以使用PayProperties Bean直接读取到配置项中的值 
-app.pay.alipay.notify-url=http://dev.app.com/app/pay/zhifubao_callback
-app.pay.alipay.app-id=20180666666666666666
-app.pay.wx-pay.app-id=wxa6666666666666666666666
-app.pay.wx-pay.api-key=GUOLV1234562AXQfHLyV9iG6w9yOkPEo
-app.pay.wx-pay.mch-id=6666666666666666666
+
 ```
 
 ### 4.5嵌入式servlet容器

@@ -1,0 +1,35 @@
+SpringBoot
+	SpringBoot简介
+		 SpringBoot出现原因
+		Spring的优势
+		为什么SpringBoot 这么简洁
+	SpringBoot基础
+		核心注解
+			@SpringBootApplication
+			 @EableAutoConfiguration
+			@Configuration
+			@PropertySource
+			@ImportResource
+			Enviorment
+		基本配置
+			入口类
+			关闭特定的自动配置
+			定制Banner
+				修改Banner
+				关闭Banner
+				SpringBoot的配置
+			starter pom
+		外部配置
+			命令行参数配置
+			属性配置
+				常规属性配置
+				类型安全的配置
+		日志配置
+		Profile配置
+	SpringBoot特性
+		自动管理依赖
+		独立运行
+		自动配置
+		外部化配置
+		嵌入式servlet容器
+		准生产的应用监控
