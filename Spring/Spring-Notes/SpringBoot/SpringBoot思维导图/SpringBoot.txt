@@ -33,3 +33,24 @@ SpringBoot
 		外部化配置
 		嵌入式servlet容器
 		准生产的应用监控
+	SpringBoot实战
+		数据库
+			默认数据库连接池
+			NoSQL数据库
+		邮件发送
+			普通邮件发送
+			复杂邮件发送
+		测试
+			测试SpringBoot简单应用
+			测试SpringBoot web服务
+		应用发布部署
+			配置Maven插件
+			打包可执行fatjar运行
+			打包war文件，部署到容器中
+		Production-ready特性
+			产品特性
+			端点
+				自定义端点
+			健康信息
+				自动配置的HealthIndicators
+				自定义HealthIndicators
